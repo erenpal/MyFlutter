@@ -362,6 +362,7 @@ class Expansible extends StatefulWidget {
 class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late CurvedAnimation _heightFactor;
+  bool _neverExpanded = true;
 
   Duration get _duration {
     return widget.animationStyle?.duration ?? widget.duration;
@@ -382,6 +383,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     final bool initiallyExpanded =
         PageStorage.maybeOf(context)?.readState(context) as bool? ?? widget.controller.isExpanded;
     if (initiallyExpanded) {
+      _neverExpanded = false;
       _animationController.value = 1.0;
       widget.controller.expand();
     } else {
@@ -433,6 +435,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
     setState(() {
       // Rebuild with the header and the animating body.
       if (widget.controller.isExpanded) {
+        _neverExpanded = false;
         _animationController.forward();
       } else {
         _animationController.reverse().then<void>((void value) {
@@ -468,7 +471,7 @@ class _ExpansibleState extends State<Expansible> with SingleTickerProviderStateM
         );
         return widget.expansibleBuilder(context, header, body, _animationController);
       },
-      child: shouldRemoveBody ? null : result,
+      child: shouldRemoveBody || _neverExpanded ? null : result,
     );
   }
 }
